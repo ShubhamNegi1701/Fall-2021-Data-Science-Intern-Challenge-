@@ -1,0 +1,38 @@
+﻿Question 2: For this question you’ll need to use SQL. Follow this link to access the data set required for the challenge. Please use queries to answer the following questions. Paste your queries along with your final numerical answers below.
+
+
+1. How many orders were shipped by Speedy Express in total?
+select count(OrderID) as numOrders from Orders where ShipperId = 1
+--Answer: 54
+
+
+2. What is the last name of the employee with the most orders?
+select lastName
+from (select max(orderNum), LastName 
+from (select count(Orders.OrderID) as orderNum, Employees.LastName,
+Orders.EmployeeID 
+from Orders, Employees
+where Orders.EmployeeID = Employees.EmployeeID 
+group by Orders.EmployeeID ))
+--Answer: Peacock
+
+
+3. What product was ordered the most by customers in Germany?
+select p.ProductName
+from Products p
+inner join (
+   select ProductID, MAX(Quantity)
+       from (
+             select ProductID, SUM(Quantity) as Quantity
+                  from Orders o
+                  inner join (
+                    select CustomerID
+                    from Customers
+                    where Country = 'Germany') germanCustomer 
+                  on o.CustomerID = germanCustomer.CustomerID
+                  inner join OrderDetails od
+                  on od.OrderID = o.OrderID
+                  group by ProductID )
+                  ) maxP
+on maxP.ProductID = p.ProductID
+--Answer: Boston Crab Meat
